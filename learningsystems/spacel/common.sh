@@ -440,7 +440,7 @@ add_knowledge_sources_to_config_and_get_sources() {
     for f in $data_dir/*.owl
     do
         add_to_config "ks.type = \"OWL File\"" "$config_file"
-        add_to_config "ks.fileName = \"../../../../../../../$program_dir/$f\"" "$config_file"
+        add_to_config "ks.fileName = \"../../../../$f\"" "$config_file"
 	
         sources="$sources${sources:+, }ks"
         _=$((i=i+1))

@@ -19,7 +19,7 @@ smlb_step="train"
 smlb_log_level=1
 
 cd "$(dirname "$0")"
-program_dir="$(pwd)"
+program_dir=""
 
 number_of_workers=6
 
