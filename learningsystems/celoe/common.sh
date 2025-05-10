@@ -34,6 +34,9 @@ measure_is_set=0
 reasoner_is_set=0
 
 
+export JAVA_OPTS=" --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED"
+
+
 #---  FUNCTION  ----------------------------------------------------------------
 #          NAME:  debug
 #   DESCRIPTION:  Writes debug output if log level is set accordingly.
