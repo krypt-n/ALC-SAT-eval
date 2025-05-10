@@ -8,7 +8,7 @@ cp -R "dllearner-${dllearner_version}" learningsystems/celoe/
 rm "dllearner-${dllearner_version}.tar.gz"
 mvn package -D skipTests
 pip install "pandas==2.2.3"
-pip install "owl2ready==0.35"
+pip install "owlready2==0.35"
 pip install "scikit-learn==1.0.2" --no-build-isolation
 pip install "deap=1.4.3"
 pip install "tabulate"
