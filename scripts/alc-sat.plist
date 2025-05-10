@@ -1,6 +1,6 @@
 {
   config = 1;
-  learningsystems = ( alc-sat );
+  learningsystems = ( alc_sat );
   scenarios = ( carcinogenesis/1, family/uncle, hepatitis/1, lymphography/1, mammographic/1, mutagenesis/42, nctrer/1, premierleague/1, pyrimidine/1 )
 
   measures = ( fmeasure, pred_acc );

@@ -1,34 +1,19 @@
 #!/bin/bash
 
-add_line() {
-    sed '$d' "temp1$2" > "$1$2"
-    tail -1 "temp2$2" >> "$1$2"
-    tail -1 "temp1$2" >> "$1$2"
-}
-
-name='EvoLearner'
-name2='CELOE'
-name3='SPaCEL'
-name4='ALC-SAT'
-
 mkdir -p results
-results=()
 
 mvn -e exec:java -Dexec.mainClass=org.aksw.mlbenchmark.Benchmark -Dexec.args=scripts/evolearner.plist
-results+=("textResult-evolearner.xml")
+python scripts/sml_parser.py "testResult-evolearner.xml" "evolearner"
 
 mvn -e exec:java -Dexec.mainClass=org.aksw.mlbenchmark.Benchmark -Dexec.args=scripts/celoe.plist
-results+=("textResult-celoe.xml")
+python scripts/sml_parser.py "testResult-celoe.xml" "celoe"
 
 mvn -e exec:java -Dexec.mainClass=org.aksw.mlbenchmark.Benchmark -Dexec.args=scripts/spacel.plist
-results+=("textResult-spacel.xml")
+python scripts/sml_parser.py "testResult-spacel.xml" "spacel"
 
 mvn -e exec:java -Dexec.mainClass=org.aksw.mlbenchmark.Benchmark -Dexec.args=scripts/alc-sat.plist
-results+=("textResult-alc-sat.xml")
+python scripts/sml_parser.py "testResult-alc-sat.xml" "alc-sat"
 
-rm "$config_file"
-python scripts/sml_parser.py "${results[@]}" "$name"
-
-python scripts/combine_frames.py "${name}f1"   "results/f1_systems.md"
-python scripts/combine_frames.py "${name}acc"   "results/accuracy_systems.md"
-python scripts/combine_frames.py "${name}length"   "results/length_systems.md"
+python scripts/combine_frames.py "evolearnerf1" "celoef1" "spacelf1" "alc-satf1"   "results/f1_systems.md"
+python scripts/combine_frames.py "evolearneracc" "celoeacc" "spacelacc" "alc-satacc"   "results/acc_systems.md"
+python scripts/combine_frames.py "evolearnerlength" "celoelength" "spacellength" "alc-satlength"   "results/length_systems.md"
