@@ -182,13 +182,13 @@ public class RhoDRDown2008 extends RefinementOperatorAdapter {
 	private boolean applyExistsFilter = true;
 	private boolean useAllConstructor = true;
 	private boolean useExistsConstructor = true;
-	private boolean useHasValueConstructor = false;
-	private boolean useCardinalityRestrictions = true;
+	private boolean useHasValueConstructor = true;
+	private boolean useCardinalityRestrictions = false;
 	private boolean useNegation = true;
-	private boolean useBooleanDatatypes = true;
-	private boolean useDoubleDatatypes = true;
+	private boolean useBooleanDatatypes = false;
+	private boolean useDoubleDatatypes = false;
 	@SuppressWarnings("unused")
-	private boolean useStringDatatypes = true;
+	private boolean useStringDatatypes = false;
 	private boolean disjointChecks = true;
 	private boolean instanceBasedDisjoints = true;
 

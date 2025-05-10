@@ -123,15 +123,15 @@ public class ParCELDoubleSplitterV1 implements ParCELDoubleSplitterAbstract {
 
 		// get a list of double data type properties for filtering out other properties
 		this.numericDatatypeProperties = new HashSet<OWLDataPropertyExpression>();
-		for (DatatypeProperty dp : reasoner.getDoubleDatatypeProperties())
-			this.numericDatatypeProperties.add(OWLAPIConverter.getOWLAPIDataProperty(dp));
+		// for (DatatypeProperty dp : reasoner.getDoubleDatatypeProperties())
+		// 	this.numericDatatypeProperties.add(OWLAPIConverter.getOWLAPIDataProperty(dp));
 		
 		//logger.info("Numeric data properties: " + numericDatatypeProperties);
 
 		//get a list of integer datatype properties
 		SortedSet<DatatypeProperty> intDatatypeProperties = reasoner.getIntDatatypeProperties();
-		for (DatatypeProperty dp : intDatatypeProperties)
-			this.numericDatatypeProperties.add(OWLAPIConverter.getOWLAPIDataProperty(dp));
+		// for (DatatypeProperty dp : intDatatypeProperties)
+		// 	this.numericDatatypeProperties.add(OWLAPIConverter.getOWLAPIDataProperty(dp));
 		
 		
 		if (logger.isInfoEnabled())

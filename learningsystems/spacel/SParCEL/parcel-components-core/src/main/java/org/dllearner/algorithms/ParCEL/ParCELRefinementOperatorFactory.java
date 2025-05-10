@@ -29,7 +29,7 @@ public class ParCELRefinementOperatorFactory extends BasePoolableObjectFactory<R
 
 	private boolean useNegation = true;
 	private boolean useDisjunction = true;
-	private boolean useHasValue = true;
+	private boolean useHasValue = false;
 	
 	
 	Logger logger = Logger.getLogger(this.getClass());	
@@ -80,7 +80,7 @@ public class ParCELRefinementOperatorFactory extends BasePoolableObjectFactory<R
 		refinementOperator.setAllowDisjunction(this.useDisjunction);
 		refinementOperator.setUseNegation(this.useNegation);
 		refinementOperator.setUseDataHasValueConstructor(this.useHasValue);
-		refinementOperator.setUseHasValueConstructor(this.useHasValue);
+		refinementOperator.setUseHasValueConstructor(false);
 		refinementOperator.setMaxNoOfSplits(maxNoOfSplits);
 		
 		if (this.splits != null)
