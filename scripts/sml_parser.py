@@ -16,6 +16,17 @@ def length_evo(concept_string):
         sum(map(concept_string.count, ("exists", "forall", "someValues",
                                        "hasValue", "cargeq", "carleq")))
 
+def length_alcsat(concept_string):
+    sz = 1
+    sz += concept_string.count("AND") * 2
+    sz += concept_string.count("OR") * 2
+    sz += concept_string.count("NEG") * 1
+
+    # manchester counts these as two symbols
+    sz += concept_string.count("∃.") * 2
+    sz += concept_string.count("∀.") * 2
+    return sz
+
 
 def get_averages(f):
     root = ET.parse(f).getroot()
@@ -38,7 +49,7 @@ def get_averages(f):
                 n[number] = nn
             else:
                 nn = n[number]
-
+    
             for fold, r3 in zip(r2[0::2], r2[1::2]):
                 for system, r4 in zip(r3[0::2], r3[1::2]):
                     system = system.text
@@ -88,6 +99,9 @@ def get_averages(f):
                             elif system == "evolearner":
                                 length = length_evo(value.text)
                                 output.append(length)
+                            elif system == "spell":
+                                length = length_alcsat(value.text)
+                                output.append(length)
     return datasets
 
 
@@ -101,12 +115,12 @@ if __name__ == "__main__":
         runs.append(get_averages(f))
 
     datasets = runs[0]
-
+    
     data_f1 = collections.OrderedDict()
     data_acc = collections.OrderedDict()
     data_length = collections.OrderedDict()
     systems = []
-
+    
     for d in datasets:
         vals_acc = []
         data_acc[d] = vals_acc
@@ -142,12 +156,14 @@ if __name__ == "__main__":
                             vals_f1.append((current_mean, current_stdev))
                         if measure == "length":
                             vals_length.append((current_mean, current_stdev))
+
                 if current_mean == -1:
                     vals_acc.append((None))
                     vals_f1.append((None))
                     vals_length.append((None))
                 elif system == "aleph_swipl":
                     vals_length.append((None))
+   
 
     df = pd.DataFrame(data_acc, index=systems)
     df.T.to_csv(sys.argv[-1] + 'acc')
