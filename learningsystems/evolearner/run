@@ -141,7 +141,7 @@ if __name__ == '__main__':
     	_log.debug('No OWL KnowledgeBase found on path %s' % owl_file_path)
 
     pos_examples, neg_examples = read_pos_neg_examples(cfg['filename.pos'], cfg['filename.neg'])
-    loading_time = 200
+    loading_time = 20
     actual_train_time = int(max_exec_time) - loading_time
     signal.signal(signal.SIGALRM, handler)
 
@@ -158,6 +158,8 @@ if __name__ == '__main__':
     if init_method == "random_walk_wo_paths":
         init_method = "random_walk"
         random_walk_paths = False
+
+    expressivity = "ALC"
 
     evo = EvoLearner(kb, terminate_on_goal=False, max_r=max_neighbours,
                      expressivity=expressivity, init_method=init_method,
