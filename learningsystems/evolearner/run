@@ -1,27 +1,18 @@
 #!/usr/bin/env python
 
-"""For importing evolearner in this script, assuming EvoLearner is in the evolearner directory in learningsystems"""
-import sys
 import os
-import random
-sys.path.append(os.path.join(os.path.dirname(__file__), 'EvoLearner'))
 
 import argparse
-import time
 import signal
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+from ontolearn.concept_learner import EvoLearner
+from ontolearn.knowledge_base import KnowledgeBase
+from owlapy.owl_individual import OWLNamedIndividual, IRI
+
 
 import logging
-
-from evolearner.evo_learner import EvoLearner
-from evolearner.base import KnowledgeBase
-from evolearner import fitness_functions
-from evolearner import gen_trees
-from deap import tools, gp
+from ontolearn.learning_problem import PosNegLPStandard
+from owlapy.render import DLSyntaxObjectRenderer
 
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
@@ -58,58 +49,16 @@ def read_config(path):
 
     return settings
 
-def best_hypotheses(evo, n=5):
-    assert evo.result_population is not None
-    assert len(evo.result_population) > 0
-    best_inds = tools.selBest(evo.result_population, k=n, fit_attr="fitness")
-    return best_inds
+def best_hypotheses(evo):
+    prediction = evo.best_hypotheses(n = 1, return_node=True)    
+    rdr = DLSyntaxObjectRenderer()
+    return rdr.render(prediction.concept)
 
 def handler(signum, frame):
     _log.debug('Interrupting EvoLearner Training Process')
     raise Exception('Maximum Execution Time Limit Reached for EvoLearner')
 
 if __name__ == '__main__':
-    #Default values
-    max_neighbours = 2
-    expressivity = "ALCN(D)"
-    init_method = "random_walk"
-    random_max_height = 6
-    x = 2048
-    mutation = None
-    random_walk_type = True
-    random_walk_paths = True
-
-    if os.path.isfile("evo_config.prop"):
-        settings = read_config("evo_config.prop")
-
-        if "seed" in settings:
-            random.seed(int(settings["seed"]))
-            _log.debug('Seed is %s' % settings["seed"])
-
-        if "max_neighbours" in settings:
-            max_neighbours = int(settings["max_neighbours"])
-            _log.debug('Max neighbours is %s' % settings["max_neighbours"])
-
-        if "mutation" in settings:
-            mutation = settings["mutation"]
-            _log.debug('Mutation is %s' % settings["mutation"])
-
-        if "expressivity" in settings:
-            expressivity = settings["expressivity"]
-            _log.debug('Expressivity is %s' % settings["expressivity"])
-
-        if "init_method" in settings:
-            init_method = settings["init_method"]
-            _log.debug('Init method is %s' % settings["init_method"])
-
-        if "random_max_height" in settings:
-            random_max_height = int(settings["random_max_height"])
-            _log.debug('Random max height is %s' % settings["random_max_height"])
-
-        if "x" in settings:
-            x = int(settings["x"])
-            _log.debug('X is %s' % settings["x"])
-
     argparser = argparse.ArgumentParser()
     argparser.add_argument('config_file')
     args = argparser.parse_args()
@@ -138,53 +87,38 @@ if __name__ == '__main__':
         owl_file_path = os.path.join(data_dir, f_name)
         _log.debug('Path to OWL KnowledgeBase is %s' % owl_file_path)
     else:
-    	_log.debug('No OWL KnowledgeBase found on path %s' % owl_file_path)
-
+    	_log.debug('No OWL KnowledgeBase found on path %s' % f_name)
+    
     pos_examples, neg_examples = read_pos_neg_examples(cfg['filename.pos'], cfg['filename.neg'])
     loading_time = 20
     actual_train_time = int(max_exec_time) - loading_time
     signal.signal(signal.SIGALRM, handler)
 
     # Code for running evolearner
-    kb = KnowledgeBase(path=owl_file_path)
-    # init_method = "random_walk", "random_walk_wo_types", random_walk_wo_paths", 
-    #               "random_full",  "random_grow", "random_rhh", 
-    # random_max_height = 2, 4, 6, 8, 10
+    kb = KnowledgeBase(path=owl_file_path, include_implicit_individuals=True)
 
-    if init_method == "random_walk_wo_type":
-        init_method = "random_walk"
-        random_walk_type = False
+    typed_pos = set(map(OWLNamedIndividual, map(IRI.create, pos_examples)))
+    typed_neg = set(map(OWLNamedIndividual, map(IRI.create, neg_examples)))
+    lp = PosNegLPStandard(pos=typed_pos, neg=typed_neg)
 
-    if init_method == "random_walk_wo_paths":
-        init_method = "random_walk"
-        random_walk_paths = False
 
-    expressivity = "ALC"
 
-    evo = EvoLearner(kb, terminate_on_goal=False, max_r=max_neighbours,
-                     expressivity=expressivity, init_method=init_method,
-                     random_max_height=random_max_height, rw_type=random_walk_type,
-                     rw_paths=random_walk_paths, x=x)
+    evo = EvoLearner(kb, terminate_on_goal=False,  max_runtime=int(actual_train_time), 
+        num_generations=2000,
+        use_card_restrictions=False,
+        use_data_properties=False)
 
-    if mutation == "nodeReplacement":
-        evo.register_op("mutate", gp.mutNodeReplacement, pset=evo.pset)
-    elif mutation == "shrink":
-        evo.register_op("mutate", gp.mutShrink)
-    elif mutation == "insert":
-        evo.register_op("mutate", gp.mutInsert, pset=evo.pset)
-    elif mutation == "crossleafbiased":
-        evo.register_op("mate", gen_trees.cxOnePointLeafBiased, termpb=0.1)
 
     signal.alarm(actual_train_time)
     try:
         _log.debug('Log Output before calling the fit function')
-        evo.fit(pos_examples, neg_examples, verbose=False)
+        evo.fit(lp, verbose = True)
     except Exception as exc: 
         _log.debug(exc)
     finally:
         signal.alarm(0)
 
-    best = best_hypotheses(evo, n=1)[0]
+    best = best_hypotheses(evo)
 
     with open(output_file_path, 'w') as out:
         out.write(str(best) + "\n")

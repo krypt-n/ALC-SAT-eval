@@ -3,22 +3,16 @@
 """For importing evolearner in this script, assuming EvoLearner is in the evolearner directory in learningsystems"""
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'EvoLearner'))
 
 import argparse
 import time
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
 
 import logging
 
-from evolearner.evo_learner import EvoLearner
-from evolearner.base import KnowledgeBase
-from deap import gp
-from deap import creator
+from ontolearn.knowledge_base import KnowledgeBase
+
+from owlapy.parser import DLSyntaxParser
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(message)s')
 _log = logging.getLogger()
@@ -53,13 +47,9 @@ def read_config(path):
 
     return settings
 
-def validate(evo_obj, results, pos_examples, neg_examples):
+def validate(instances, pos_examples, neg_examples):
     pos = set(pos_examples)
     neg = set(neg_examples)
-
-    concept = gp.compile(results[0], evo_obj.pset)
-
-    instances = concept.instances
 
     tp = len(pos.intersection(instances))
     fp = len(neg.intersection(instances))
@@ -114,9 +104,14 @@ if __name__ == '__main__':
 
     pos_examples, neg_examples = read_pos_neg_examples(pos_examples_file_path, neg_examples_file_path)
     kb = KnowledgeBase(path=owl_file_path)
-    evo = EvoLearner(kb, terminate_on_goal=True)
 
-    num_tp, num_fp, num_tn, num_fn = validate(evo, results, pos_examples, neg_examples)
+    kb_namespace = list(kb.ontology.classes_in_signature())[0].iri.get_namespace()
+    parser = DLSyntaxParser(kb_namespace)
+    concept = parser.parse(results[0])
+
+    inds = [ i.iri.as_str() for i in kb.individuals(concept)]
+
+    num_tp, num_fp, num_tn, num_fn = validate(inds, pos_examples, neg_examples)
 
     with open(output_file_name, 'w') as f:
         f.write('tp: %i' % num_tp + os.linesep +
