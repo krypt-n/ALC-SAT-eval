@@ -90,7 +90,7 @@ if __name__ == '__main__':
     	_log.debug('No OWL KnowledgeBase found on path %s' % f_name)
     
     pos_examples, neg_examples = read_pos_neg_examples(cfg['filename.pos'], cfg['filename.neg'])
-    loading_time = 20
+    loading_time = 50
     actual_train_time = int(max_exec_time) - loading_time
     signal.signal(signal.SIGALRM, handler)
 
@@ -102,21 +102,17 @@ if __name__ == '__main__':
     lp = PosNegLPStandard(pos=typed_pos, neg=typed_neg)
 
 
-
-    evo = EvoLearner(kb, terminate_on_goal=False,  max_runtime=int(actual_train_time), 
+    evo = EvoLearner(kb, max_runtime=actual_train_time, 
         num_generations=2000,
         use_card_restrictions=False,
         use_data_properties=False)
 
 
-    signal.alarm(actual_train_time)
     try:
         _log.debug('Log Output before calling the fit function')
         evo.fit(lp, verbose = True)
     except Exception as exc: 
         _log.debug(exc)
-    finally:
-        signal.alarm(0)
 
     best = best_hypotheses(evo)
 
