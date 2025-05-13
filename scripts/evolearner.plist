@@ -1,7 +1,7 @@
 {
   config = 1;
   learningsystems = ( evolearner );
-  scenarios = ( carcinogenesis/1, family/uncle, hepatitis/1, lymphography/1, mammographic/1, mutagenesis/42, nctrer/1, premierleague/1, pyrimidine/1 )
+  scenarios = ( carcinogenesis/1, family/uncle, hepatitis/1, lymphography/1, mammographic/1, mutagenesis/42, nctrer/1, premierleague/1 )
 
   measures = ( fmeasure, pred_acc );
   framework = {
